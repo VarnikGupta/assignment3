@@ -3,51 +3,72 @@
 @import url('https://fonts.googleapis.com/css2?family=Advent+Pro:wght@200&family=Barlow:wght@900&family=Dancing+Script&family=Fraunces:ital,wght@0,700;1,900&family=Karma:wght@300&family=Kumbh+Sans:wght@400;700&display=swap');
 
 :root {
-  --white: hsl(0, 0%, 100%);
-  --floral-white: rgba(255, 250, 240, 0.733);
-  --black: hsl(0, 100%, 0%);
-
-  --font: 'Fraunces', serif;
+    --white: hsl(0, 0%, 100%);
+    --floral-white: rgba(255, 250, 240, 0.733);
+    --black: hsl(0, 100%, 0%);
+    --red: rgb(175, 65, 83);
+    --font: 'Fraunces', serif;
 }
 
-body{
+body {
     background-color: var(--black);
 }
 
-.container{
+.container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     /* border: 2px solid firebrick; */
-    height: 70vh;
+    height: 80vh;
 }
 
-.headers{
+.headers {
     color: var(--floral-white);
     font-size: 2.5rem;
     font-family: var(--font);
     padding: 1rem;
 }
 
-#ctx{
+#ctx {
     /* border: 2px solid gray; */
     background-color: var(--white);
     border-radius: 1%;
-    height: 300px;    
-    width: 400px;
+    height: 35rem;
+    width: 32rem;
     /* padding: 5rem; */
 }
 
-h2{
+h2 {
     color: var(--floral-white);
     font-size: 1.5rem;
     font-weight: 500;
 }
 
-.info{
-    width: 400px;
+.info {
+    width: 32rem;
     display: flex;
     justify-content: space-between;
     /* border: 2px solid darkblue; */
+}
+
+
+.btn {
+    -webkit-border-radius: 12;
+    -moz-border-radius: 12;
+    border-radius: 12px;
+    text-shadow: 1px 1px 3px #666666;
+    font-family: Georgia;
+    color: #ffffff;
+    font-size: 20px;
+    background: #972e3f;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    visibility: hidden;
+}
+
+.btn:hover {
+    background: #af4153;
+    cursor: pointer;
+    text-decoration: none;
 }

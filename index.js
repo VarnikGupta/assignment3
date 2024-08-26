@@ -28,6 +28,7 @@ var ball = {
   radius: 4,
   spdX: 4,
   spdY: 4,
+  moving: false,
 };
 
 var tile = {
@@ -53,6 +54,8 @@ document.addEventListener("keydown", function (Event) {
       base.left = false;
       base.right = true;
       break;
+    case " ":
+      ball.moving = true;
   }
 });
 
@@ -94,7 +97,10 @@ drawStrTile = function (obj) {
 drawTile = function (obj) {
   ctx.save();
   ctx.fillStyle = tile.color;
-  ctx.fillRect(obj.x, obj.y, tile.width, tile.height);
+  if (obj.corner == true)
+    ctx.fillRect(obj.x, obj.y, 10.5, tile.height);
+  else
+    ctx.fillRect(obj.x, obj.y, tile.width, tile.height);
   ctx.restore();
 };
 
@@ -136,29 +142,33 @@ collisionBaseBall = function (base, ball) {
 };
 
 updateBasePosition = function () {
-  if (base.left) {
-    base.x -= 5;
-  } else if (base.right) {
-    base.x += 5;
-  }
-  if (base.x < 0) {
-    base.x = 0;
-  } else if (base.x > 225) {
-    base.x = 225;
+  if (ball.moving) {
+    if (base.left) {
+      base.x -= 5;
+    } else if (base.right) {
+      base.x += 5;
+    }
+    if (base.x < 0) {
+      base.x = 0;
+    } else if (base.x > 225) {
+      base.x = 225;
+    }
   }
 };
 
 updateBallPosition = function () {
-  ball.x += ball.spdX;
-  ball.y += ball.spdY;
-  if (ball.x <= 0 + ball.radius) {
-    ball.spdX *= -1;
-  } else if (ball.x >= 300 - ball.radius) {
-    ball.spdX *= -1;
-  } else if (ball.y <= 0 + ball.radius) {
-    ball.spdY *= -1;
-  } else if (ball.y >= 400 - ball.radius) {
-    ball.spdY *= -1;
+  if (ball.moving) {
+    ball.x += ball.spdX;
+    ball.y += ball.spdY;
+    if (ball.x <= 0 + ball.radius) {
+      ball.spdX *= -1;
+    } else if (ball.x >= 300 - ball.radius) {
+      ball.spdX *= -1;
+    } else if (ball.y <= 0 + ball.radius) {
+      ball.spdY *= -1;
+    } else if (ball.y >= 400 - ball.radius) {
+      ball.spdY *= -1;
+    }
   }
 };
 
@@ -173,56 +183,103 @@ collisionBallTile = function (t) {
   }
 };
 
-updateGame = function () {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  strTileList.forEach((x) => {
-    if (x.strength == 2)
-      drawStrTile(x)
-    else
-      drawTile(x)
-  });
-  tileList.forEach((x) => drawTile(x));
-  drawBase();
-  drawBall();
-  collisionBaseBall(base, ball);
-  updateBasePosition();
-  updateBallPosition();
-
-  // for (key in strTileList) {
-  //   if (collisionBallTile(strTileList[key])) {
-  //     if (strTileList[key].strength == 2) {
-  //       score += 2;
-  //     } else {
-  //       score++;
-  //     }
-  //     strTileList[key].strength--;
-  //     ball.spdY *= -1;
-  //   }
-  // }
-
-  for (key in tileList) {
-    if (collisionBallTile(tileList[key])) {
-      delete tileList[key];
-      score++;
-      ball.spdY *= -1;
-    }
+checkLives = function () {
+  if (ball.y + ball.radius >= 200) {
+    lives--;
+    base.x = 115;
+    base.y = 135;
+    ball.x = base.x + 36;
+    ball.y = base.y - 4;
+    ball.moving = false;
+    return true;
   }
-  
+  return false;
+};
+
+gameWin = function () {
+  if (score == 82) {
+    ctx.save();
+    ctx.fillStyle = "red";
+    ctx.font = "30px  comic sans MS ";
+    ctx.fillText("You Win ..!", 70, 80);
+    ctx.restore();
+    clearInterval(intervalVal);
+    restartBtn();
+  }
+};
+
+updateData = function () {
   let scoreEle = document.getElementById("score");
   scoreEle.innerHTML = score;
 
   let livesEle = document.getElementById("lives");
   livesEle.innerHTML = lives;
+}
+
+gameOverMsg = function () {
+  ctx.save();
+  ctx.fillStyle = "red";
+  ctx.font = "30px  comic sans MS ";
+  ctx.fillText("Game Over ..!", 70, 80);
+  ctx.restore();
+  clearInterval(intervalVal);
 };
-// don't hardcode
-// screen size brick size
-//collision
-//start ball after event
-// green tile centred
+
+restartBtn = function () {
+  let btn = document.getElementById("restart");
+  btn.style.visibility = "visible";
+  btn.onclick = function () {
+    btn.style.visibility = "hidden";
+    ball.moving = false;
+    startGame();
+  };
+}
+
+updateGame = function () {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  strTileList.forEach((x) => {
+    if (x.strength == 2) drawStrTile(x);
+    else drawTile(x);
+  });
+  tileList.forEach((x) => drawTile(x));
+  drawBase();
+  drawBall();
+  if (ball.moving) {
+    collisionBaseBall(base, ball);
+    updateBasePosition();
+    updateBallPosition();
+    checkLives();
+    gameWin();
+
+    for (key in strTileList) {
+      if (collisionBallTile(strTileList[key])) {
+        score++;
+        strTileList[key].strength--;
+        if (strTileList[key].strength == 0) delete strTileList[key];
+        ball.spdY *= -1;
+      }
+    }
+
+    for (key in tileList) {
+      if (collisionBallTile(tileList[key])) {
+        delete tileList[key];
+        score++;
+        ball.spdY *= -1;
+      }
+    }
+
+    updateData();
+
+    if (lives <= 0) {
+      gameOverMsg();
+      restartBtn();
+    }
+  }
+};
 
 startGame = function () {
   base.x = 115;
-  base.y = 135; 
+  base.y = 135;
   ball.x = base.x + 36;
   ball.y = base.y - 4;
 
@@ -248,10 +305,13 @@ startGame = function () {
 
   for (var i = 1; i < 3; ++i) {
     var tileX = 7;
-    for (var j = 1; j < 11; ++j) {
+    tileList[noOfTiles++] = { x: tileX, y: tileY, corner: true };
+    tileX += 14;
+    for (var j = 1; j < 10; ++j) {
       tileList[noOfTiles++] = { x: tileX, y: tileY };
       tileX += 29;
     }
+    tileList[noOfTiles++] = { x: tileX, y: tileY, corner: true };
     tileY += 28;
   }
 
@@ -260,6 +320,7 @@ startGame = function () {
   drawBall();
   strTileList.forEach((x) => drawStrTile(x));
   tileList.forEach((x) => drawTile(x));
+  updateData();
   intervalVal = setInterval(updateGame, 25);
 };
 
