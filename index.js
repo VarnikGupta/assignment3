@@ -2,6 +2,9 @@ var ctx = document.getElementById("ctx").getContext("2d");
 ctx.fontStyle = "blue";
 ctx.font = "16px comic sans MS";
 
+var canvasWidth = ctx.canvas.width;
+var canvasHeight = ctx.canvas.height;
+
 var tileList,
   noOfTiles,
   score = 0,
@@ -9,6 +12,7 @@ var tileList,
   intervalVal,
   noOfStrTiles,
   strTileList,
+  maxScore,
   start = 0;
 
 var base = {
@@ -204,6 +208,7 @@ gameWin = function () {
     ctx.fillText("You Win ..!", 70, 80);
     ctx.restore();
     clearInterval(intervalVal);
+    setHighSore(Math.max(score, maxScore));
     restartBtn();
   }
 };
@@ -222,6 +227,7 @@ gameOverMsg = function () {
   ctx.font = "30px  comic sans MS ";
   ctx.fillText("Game Over ..!", 70, 80);
   ctx.restore();
+  setHighSore(Math.max(score, maxScore));
   clearInterval(intervalVal);
 };
 
@@ -233,6 +239,19 @@ restartBtn = function () {
     ball.moving = false;
     startGame();
   };
+}
+
+setHighSore = function (value) {
+  console.log("set", value);
+  localStorage.setItem("score", value);
+  document.getElementById("highScore").innerHTML = value;
+}
+
+fetchHighScore = function () {
+  let score = localStorage.getItem('score');
+  score = score ? parseInt(score) : 0;
+  console.log("fetched", score);
+  return score;
 }
 
 updateGame = function () {
@@ -288,6 +307,8 @@ startGame = function () {
   noOfTiles = 0;
   noOfStrTiles = 0;
 
+  maxScore = fetchHighScore();
+
   var strTileY = 6;
   var tileY = 20;
 
@@ -330,6 +351,7 @@ startMsg = function () {
   ctx.fillStyle = "red";
   ctx.fillText("Click to start!!", 85, 80);
   ctx.restore();
+  
   document.getElementById("ctx").onclick = function () {
     if (start == 0) {
       start = 1;
@@ -339,5 +361,6 @@ startMsg = function () {
 };
 
 if (start == 0) {
+  document.getElementById("highScore").innerHTML = fetchHighScore();
   startMsg();
 }
