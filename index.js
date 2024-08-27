@@ -13,6 +13,7 @@ var tileList,
   noOfStrTiles,
   strTileList,
   maxScore,
+  playerName="",
   start = 0;
 
 var base = {
@@ -73,6 +74,12 @@ document.addEventListener("keyup", function (event) {
       base.right = false;
       break;
   }
+});
+
+document.getElementById('name').addEventListener('input', function() {
+  let inputValue = this.value;
+  playerName = this.value
+  console.log('Current input value: ', inputValue);
 });
 
 drawBase = function () {
@@ -336,6 +343,7 @@ startGame = function () {
     tileY += 28;
   }
 
+  document.getElementById("data").style.visibility="hidden"
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   drawBase();
   drawBall();
@@ -347,13 +355,13 @@ startGame = function () {
 
 startMsg = function () {
   ctx.save();
-  ctx.font = "20px Fraunces";
+  ctx.font = "17px Fraunces";
   ctx.fillStyle = "red";
-  ctx.fillText("Click to start!!", 85, 80);
+  ctx.fillText("Enter your Name", 78, 70);
   ctx.restore();
   
-  document.getElementById("ctx").onclick = function () {
-    if (start == 0) {
+  document.getElementById("arrow").onclick = function () {
+    if (start == 0 && playerName != "") {
       start = 1;
       startGame();
     }
@@ -364,3 +372,4 @@ if (start == 0) {
   document.getElementById("highScore").innerHTML = fetchHighScore();
   startMsg();
 }
+
