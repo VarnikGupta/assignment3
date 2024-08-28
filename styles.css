@@ -42,14 +42,14 @@ body {
 }
 
 .rank{
-    margin-top: 3.5rem;
+    margin-top: 2rem;
     /* border: 2px solid darkblue; */
-    overflow-y: auto;
-    overflow-x: hidden;
+    /* overflow-y: auto;
+    overflow-x: hidden; */
     height: 28rem;
     width: 25rem;
     color: white;
-    padding: 1rem;
+    /* padding: 1rem; */
 }
 
 .headers {
