@@ -13,6 +13,7 @@ var tileList,
   noOfStrTiles,
   strTileList,
   maxScore,
+  playerName = "",
   start = 0;
 
 var base = {
@@ -38,13 +39,13 @@ var ball = {
 var tile = {
   color: "green",
   height: 10,
-  width: 25
+  width: 25,
 };
 
 var strongTile = {
   color: "blue",
   width: 25,
-  height: 10
+  height: 10,
 };
 
 document.addEventListener("keydown", function (Event) {
@@ -73,6 +74,12 @@ document.addEventListener("keyup", function (event) {
       base.right = false;
       break;
   }
+});
+
+document.getElementById("name").addEventListener("input", function () {
+  let inputValue = this.value;
+  playerName = this.value;
+  console.log("Current input value: ", inputValue);
 });
 
 drawBase = function () {
@@ -108,31 +115,30 @@ drawTile = function (obj) {
   ctx.restore();
 };
 
-// collisionBaseBall = function (base, ball) {
-//   if (
-//     ball.y + ball.radius == 135 &&
-//     ball.x + ball.radius >= base.x &&
-//     ball.x - ball.radius <= base.x + 75
-//   ) {
-//     ball.spdY = ball.spdY * -1;
-//   }
-//   // else if (
-//   //   ball.y - ball.radius == 143 &&
-//   //   ball.x + ball.radius >= base.x &&
-//   //   ball.x - ball.radius <= base.x + 75
-//   // ) {
-//   //   ball.spdY = ball.spdY * -1;
-//   // }
-//   // else if (
-//   //   ball.y + ball.radius > 135 &&
-//   //   ball.y - ball.radius < 143 &&
-//   //   ball.x + ball.radius >= base.x &&
-//   //   ball.x - ball.radius <= base.x + 75
-//   // ) {
-//   //   ball.spdY = ball.spdY * -1;
-//   //   ball.spdX = ball.spdX * -1;
-//   // }
-// };
+function updateLeaderboard(playerName, score) {
+  let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+  leaderboard.push({ name: playerName, score: score });
+  leaderboard.sort((a, b) => b.score - a.score);
+  leaderboard = leaderboard.slice(0, 10);
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+}
+
+function renderLeaderboard() {
+  let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+  console.log(leaderboard);
+
+  const table = document.getElementById("leaderboard");
+  table.innerHTML = "";
+  leaderboard.forEach((item, index) => {
+    let row = table.insertRow();
+    let ind = row.insertCell(0);
+    ind.innerHTML = index + 1;
+    let name = row.insertCell(1);
+    name.innerHTML = item.name;
+    let score = row.insertCell(2);
+    score.innerHTML = item.score;
+  });
+}
 
 collisionBaseBall = function (base, ball) {
   if (
@@ -209,6 +215,8 @@ gameWin = function () {
     ctx.restore();
     clearInterval(intervalVal);
     setHighSore(Math.max(score, maxScore));
+    updateLeaderboard(playerName, score);
+    renderLeaderboard();
     restartBtn();
   }
 };
@@ -228,6 +236,8 @@ gameOverMsg = function () {
   ctx.fillText("Game Over ..!", 70, 80);
   ctx.restore();
   setHighSore(Math.max(score, maxScore));
+  updateLeaderboard(playerName, score);
+  renderLeaderboard();
   clearInterval(intervalVal);
 };
 
@@ -248,7 +258,7 @@ setHighSore = function (value) {
 }
 
 fetchHighScore = function () {
-  let score = localStorage.getItem('score');
+  let score = localStorage.getItem("score");
   score = score ? parseInt(score) : 0;
   console.log("fetched", score);
   return score;
@@ -336,6 +346,7 @@ startGame = function () {
     tileY += 28;
   }
 
+  document.getElementById("data").style.visibility = "hidden";
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   drawBase();
   drawBall();
@@ -347,13 +358,13 @@ startGame = function () {
 
 startMsg = function () {
   ctx.save();
-  ctx.font = "20px Fraunces";
+  ctx.font = "17px Fraunces";
   ctx.fillStyle = "red";
-  ctx.fillText("Click to start!!", 85, 80);
+  ctx.fillText("Enter your Name", 78, 70);
   ctx.restore();
-  
-  document.getElementById("ctx").onclick = function () {
-    if (start == 0) {
+
+  document.getElementById("arrow").onclick = function () {
+    if (start == 0 && playerName != "") {
       start = 1;
       startGame();
     }
@@ -361,6 +372,8 @@ startMsg = function () {
 };
 
 if (start == 0) {
+  renderLeaderboard();
   document.getElementById("highScore").innerHTML = fetchHighScore();
   startMsg();
 }
+
