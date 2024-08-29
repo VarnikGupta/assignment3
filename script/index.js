@@ -102,7 +102,13 @@ document.addEventListener("keyup", function (event) {
 document.getElementById("name").addEventListener("input", function () {
   let inputValue = this.value;
   playerName = this.value;
-  // console.log("Current input value: ", inputValue);
+  console.log("Current input value: ", inputValue);
+});
+
+document.getElementById("name").addEventListener("keypress", function (event) {
+  if (event.key === "Enter") {
+    handleStart();
+  }
 });
 
 drawBase = function () {
@@ -183,9 +189,9 @@ collisionBaseBall = function (base, ball) {
 updateBasePosition = function () {
   if (ball.moving) {
     if (base.left) {
-      base.x -= 5;
+      base.x -= 8;
     } else if (base.right) {
-      base.x += 5;
+      base.x += 8;
     }
     if (base.x < 0) {
       base.x = 0;
@@ -213,14 +219,16 @@ updateBallPosition = function () {
 
 collisionBallTile = function (t) {
   if (
-    ball.y + ball.radius >= t.y &&
-    ball.y - ball.radius <= t.y + tile.height &&
-    ball.x + ball.radius >= t.x &&
-    ball.x - ball.radius <= t.x + tile.width
+    ball.x + ball.radius > t.x &&          
+    ball.x - ball.radius < t.x + tile.width && 
+    ball.y + ball.radius > t.y &&            
+    ball.y - ball.radius < t.y + tile.height   
   ) {
     return true;
   }
+  return false;
 };
+
 
 checkLives = function () {
   if (ball.y + ball.radius >= 200) {
@@ -452,6 +460,16 @@ startGame = function () {
   intervalVal = setInterval(updateGame, 25);
 };
 
+handleStart=function(){
+  if (playerName == "") {
+    alert("Enter the player name to start!..");
+  }
+  if (start == 0 && playerName != "") {
+    start = 1;
+    startGame();
+  }
+};
+
 startMsg = function () {
   ctx.save();
   ctx.font = "17px Fraunces";
@@ -460,13 +478,7 @@ startMsg = function () {
   ctx.restore();
 
   document.getElementById("arrow").onclick = function () {
-    if (playerName == "") {
-      alert("Enter the player name to start!..");
-    }
-    if (start == 0 && playerName != "") {
-      start = 1;
-      startGame();
-    }
+    handleStart();
   };
 };
 
