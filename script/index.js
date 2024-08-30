@@ -8,7 +8,7 @@ var canvasHeight = ctx.canvas.height;
 var tileList,
   noOfTiles,
   score = 0,
-  lives,
+  lives = 3,
   intervalVal,
   noOfStrTiles,
   strTileList,
@@ -16,16 +16,18 @@ var tileList,
   activePowers,
   noOfPowers,
   playerName = "",
-  start = 0;
+  start = 0,
+  level = 1;
 
 var base = {
   x: 0,
   y: 0,
-  height: 8,
+  height: 5,
   width: 75,
   color: "blue",
   left: false,
   right: false,
+  isVisible: true,
 };
 
 var ball = {
@@ -57,9 +59,9 @@ var powerobj = {
 
 var powers = {
   width: {
-    color: "blue",
+    color: "black",
     callback: function () {
-      base.width += 10;
+      base.width -= 10;
       drawBase();
     },
   },
@@ -67,6 +69,12 @@ var powers = {
     color: "red",
     callback: function () {
       lives -= 1;
+    },
+  },
+  increaseLives: {
+    color: "green",
+    callback: function () {
+      lives += 1;
     },
   },
 };
@@ -195,8 +203,8 @@ updateBasePosition = function () {
     }
     if (base.x < 0) {
       base.x = 0;
-    } else if (base.x > 225) {
-      base.x = 225;
+    } else if (base.x + base.width > 300) {
+      base.x = 300 - base.width;
     }
   }
 };
@@ -205,13 +213,13 @@ updateBallPosition = function () {
   if (ball.moving) {
     ball.x += ball.spdX;
     ball.y += ball.spdY;
-    if (ball.x <= 0 + ball.radius) {
+    if (ball.x - ball.radius <= 0) {
       ball.spdX *= -1;
-    } else if (ball.x >= 300 - ball.radius) {
+    } else if (ball.x + ball.radius >= 300) {
       ball.spdX *= -1;
-    } else if (ball.y <= 0 + ball.radius) {
+    } else if (ball.y - ball.radius <= 0) {
       ball.spdY *= -1;
-    } else if (ball.y >= 400 - ball.radius) {
+    } else if (ball.y + ball.radius >= 400) {
       ball.spdY *= -1;
     }
   }
@@ -219,10 +227,10 @@ updateBallPosition = function () {
 
 collisionBallTile = function (t) {
   if (
-    ball.x + ball.radius > t.x &&          
-    ball.x - ball.radius < t.x + tile.width && 
-    ball.y + ball.radius > t.y &&            
-    ball.y - ball.radius < t.y + tile.height   
+    ball.x + ball.radius > t.x &&
+    ball.x - ball.radius < t.x + tile.width &&
+    ball.y + ball.radius > t.y &&
+    ball.y - ball.radius < t.y + tile.height
   ) {
     return true;
   }
@@ -246,7 +254,7 @@ checkLives = function () {
 };
 
 gameWin = function () {
-  if (score == 82) {
+  if (tileList.length === 0 && strTileList.length === 0 && level == 5) {
     ctx.save();
     ctx.fillStyle = "red";
     ctx.font = "30px  comic sans MS ";
@@ -267,6 +275,9 @@ updateData = function () {
 
   let livesEle = document.getElementById("lives");
   livesEle.innerHTML = lives;
+
+  let levelEle = document.getElementById("level");
+  levelEle.innerHTML = level;
 };
 
 gameOverMsg = function () {
@@ -305,6 +316,90 @@ fetchHighScore = function () {
   return score;
 };
 
+populateTiles = function () {
+  noOfTiles = 0;
+  noOfStrTiles = 0;
+  noOfPowers = 0;
+
+  var strTileY = 6;
+  var tileY = 20;
+
+  tileList = [];
+  strTileList = [];
+  activePowers = [];
+
+  for (var i = 1; i <= level + 1; ++i) {
+    var tileX = 7;
+    if (i % 2 !== 0) {
+      for (var j = 1; j < 11; ++j) {
+        strTileList[noOfStrTiles++] = {
+          x: tileX,
+          y: strTileY,
+          strength: 2,
+          power: null,
+        };
+        tileX += 29;
+      }
+      strTileY += 28;
+    } else {
+      tileList[noOfTiles++] = { x: tileX, y: tileY, corner: true, power: null };
+      tileX += 14;
+      for (var j = 1; j < 10; ++j) {
+        tileList[noOfTiles++] = { x: tileX, y: tileY, power: null };
+        tileX += 29;
+      }
+      tileList[noOfTiles++] = { x: tileX, y: tileY, corner: true, power: null };
+      tileY += 28;
+    }
+  }
+
+  var combinedList = [...strTileList, ...tileList];
+
+  for (let i = combinedList.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [combinedList[i], combinedList[j]] = [combinedList[j], combinedList[i]];
+  }
+
+  for (let i = 0; i <= level + 1; i++) {
+    combinedList[i].power = Math.floor(Math.random() * 2 + 1);
+  }
+
+  if (level == 4) {
+    combinedList[level + 2].power = 3;
+  }
+};
+
+updateLevel = function () {
+  if (tileList.length === 0 && strTileList.length === 0) {
+    level += 1;
+    if (level < 5) {
+      populateTiles();
+      ball.moving = false;
+      clearInterval();
+      base.x = 115;
+      base.y = 135;
+      base.width = 75;
+      ball.x = base.x + 36;
+      ball.y = base.y - 4;
+      ball.spdX = Math.abs(ball.spdX) + 0.4;
+      ball.spdY = Math.abs(ball.spdY) + 0.4;
+    }
+  }
+  // console.log("level", level);
+};
+
+function startBlinkingBase(duration) {
+  const blinkInterval = setInterval(() => {
+    base.isVisible = !base.isVisible;
+  }, 100);
+
+  setTimeout(() => {
+    clearInterval(blinkInterval);
+    base.isVisible = true;
+    drawBase();
+  }, duration);
+}
+
 updateGame = function () {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   strTileList.forEach((x) => {
@@ -312,7 +407,9 @@ updateGame = function () {
     else drawTile(x);
   });
   tileList.forEach((x) => drawTile(x));
-  drawBase();
+  if (base.isVisible == true) {
+    drawBase();
+  }
   drawBall();
   activePowers.forEach((power, index) => {
     power.y += 2;
@@ -323,6 +420,10 @@ updateGame = function () {
     ) {
       powers[power.type].callback();
       activePowers.splice(index, 1);
+      if(power.type !== "increaseLives"){
+        score -= 5;
+      }
+      startBlinkingBase(1000);
     } else if (power.y > ctx.canvas.height) {
       activePowers.splice(index, 1);
     } else {
@@ -334,6 +435,7 @@ updateGame = function () {
     collisionBaseBall(base, ball);
     updateBasePosition();
     updateBallPosition();
+    updateLevel();
     checkLives();
     gameWin();
 
@@ -353,9 +455,16 @@ updateGame = function () {
             y: strTileList[key].y,
           };
         }
+        if (strTileList[key].power == 3) {
+          activePowers[noOfPowers++] = {
+            type: "increaseLives",
+            x: strTileList[key].x,
+            y: strTileList[key].y,
+          };
+        }
         score++;
         strTileList[key].strength--;
-        if (strTileList[key].strength == 0) delete strTileList[key];
+        if (strTileList[key].strength == 0) strTileList.splice(key, 1);
         ball.spdY *= -1;
       }
     }
@@ -376,7 +485,14 @@ updateGame = function () {
             y: tileList[key].y,
           };
         }
-        delete tileList[key];
+        if (tileList[key].power == 3) {
+          activePowers[noOfPowers++] = {
+            type: "increaseLives",
+            x: tileList[key].x,
+            y: tileList[key].y,
+          };
+        }
+        tileList.splice(key, 1);
         score++;
         ball.spdY *= -1;
       }
@@ -397,58 +513,16 @@ startGame = function () {
   base.width = 75;
   ball.x = base.x + 36;
   ball.y = base.y - 4;
+  level = 1;
+  ball.spdX = 3;
+  ball.spdY = 3;
 
   score = 0;
   lives = 3;
-  noOfTiles = 0;
-  noOfStrTiles = 0;
-  noOfPowers = 0;
+  level = 1;
 
   maxScore = fetchHighScore();
-
-  var strTileY = 6;
-  var tileY = 20;
-
-  tileList = [];
-  strTileList = [];
-  activePowers = [];
-
-  for (var i = 1; i <= 3; ++i) {
-    var strTileX = 7;
-    for (var j = 1; j < 11; ++j) {
-      strTileList[noOfStrTiles++] = {
-        x: strTileX,
-        y: strTileY,
-        strength: 2,
-        power: null,
-      };
-      strTileX += 29;
-    }
-    strTileY += 28;
-  }
-
-  for (var i = 1; i < 3; ++i) {
-    var tileX = 7;
-    tileList[noOfTiles++] = { x: tileX, y: tileY, corner: true, power: null };
-    tileX += 14;
-    for (var j = 1; j < 10; ++j) {
-      tileList[noOfTiles++] = { x: tileX, y: tileY, power: null };
-      tileX += 29;
-    }
-    tileList[noOfTiles++] = { x: tileX, y: tileY, corner: true, power: null };
-    tileY += 28;
-  }
-
-  var combinedList = [...strTileList, ...tileList];
-
-  for (let i = combinedList.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [combinedList[i], combinedList[j]] = [combinedList[j], combinedList[i]];
-  }
-
-  for (let i = 0; i < 5; i++) {
-    combinedList[i].power = Math.floor(Math.random() * 2 + 1);
-  }
+  populateTiles();
 
   document.getElementById("data").style.visibility = "hidden";
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -460,7 +534,7 @@ startGame = function () {
   intervalVal = setInterval(updateGame, 25);
 };
 
-handleStart=function(){
+handleStart = function () {
   if (playerName == "") {
     alert("Enter the player name to start!..");
   }
