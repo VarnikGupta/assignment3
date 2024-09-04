@@ -12,7 +12,7 @@
         <h1 class="headers">BreakOut Game</h1>
         <div class="game">
             <div class="section">
-                <div class="highScore">
+                <div class="info">
                     <h2>Level: <span id="level">1</span></h2>
                     <h2>High Score: <span id="highScore"></span></h2>
                 </div>
@@ -25,7 +25,10 @@
                     <h2>Score: <span id="score">0</span></h2>
                     <h2>Lives: <span id="lives">3</span></h2>
                 </div>
-                <button id="restart" class="btn">Restart</button>
+                <div class="buttons">
+                    <button id="restart" class="btn">Restart</button>
+                    <button id="rankings" class="btn">Leaderboard</button>
+                </div>
             </div>
             <div class="rank">
                 <table>
@@ -39,6 +42,10 @@
                     <tbody id="leaderboard">
                     </tbody>
                 </table>
+                <div class="start">
+                    <button id="start" class="btn">Start</button>
+                    <!-- <button id="rankings" class="btn">Leaderboard</button> -->
+                </div>
             </div>
             
         </div>

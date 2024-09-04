@@ -119,6 +119,20 @@ document.getElementById("name").addEventListener("keypress", function (event) {
   }
 });
 
+document.getElementById("rankings").onclick = function () {
+  let leaderBoard=document.querySelector(".rank")
+  leaderBoard.style.display="block";
+  let gameSection=document.querySelector(".section")
+  gameSection.style.display="none";
+};
+
+document.getElementById("start").onclick = function () {
+  let leaderBoard=document.querySelector(".rank")
+  leaderBoard.style.display="none";
+  let gameSection=document.querySelector(".section")
+  gameSection.style.display="block";
+};
+
 drawBase = function () {
   ctx.save();
   ctx.fillStyle = base.color;
@@ -185,12 +199,12 @@ function renderLeaderboard() {
 
 collisionBaseBall = function (base, ball) {
   if (
-    ball.y + ball.radius == base.y &&
+    ball.y + ball.radius === base.y &&
     // ball.y - ball.radius <= base.y + base.height &&
     ball.x + ball.radius >= base.x &&
     ball.x - ball.radius <= base.x + base.width
   ) {
-    ball.spdY = ball.spdY * -1;
+    ball.spdY = -Math.abs(ball.spdY);
   }
 };
 
@@ -219,7 +233,7 @@ updateBallPosition = function () {
       ball.spdX *= -1;
     } else if (ball.y - ball.radius <= 0) {
       ball.spdY *= -1;
-    } else if (ball.y + ball.radius >= 400) {
+    } else if (ball.y + ball.radius >= 200) {
       ball.spdY *= -1;
     }
   }
@@ -294,7 +308,7 @@ gameOverMsg = function () {
 };
 
 restartBtn = function () {
-  let btn = document.getElementById("restart");
+  let btn = document.querySelector(".buttons");
   btn.style.visibility = "visible";
   btn.onclick = function () {
     btn.style.visibility = "hidden";
