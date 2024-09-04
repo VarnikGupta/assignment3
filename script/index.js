@@ -126,7 +126,7 @@ document.getElementById("rankings").onclick = function () {
   gameSection.style.display="none";
 };
 
-document.getElementById("goBack").onclick = function () {
+document.getElementById("start").onclick = function () {
   let leaderBoard=document.querySelector(".rank")
   leaderBoard.style.display="none";
   let gameSection=document.querySelector(".section")
@@ -199,12 +199,12 @@ function renderLeaderboard() {
 
 collisionBaseBall = function (base, ball) {
   if (
-    ball.y + ball.radius == base.y &&
+    ball.y + ball.radius === base.y &&
     // ball.y - ball.radius <= base.y + base.height &&
     ball.x + ball.radius >= base.x &&
     ball.x - ball.radius <= base.x + base.width
   ) {
-    ball.spdY = ball.spdY * -1;
+    ball.spdY = -Math.abs(ball.spdY);
   }
 };
 
@@ -308,7 +308,7 @@ gameOverMsg = function () {
 };
 
 restartBtn = function () {
-  let btn = document.getElementById("buttons");
+  let btn = document.querySelector(".buttons");
   btn.style.visibility = "visible";
   btn.onclick = function () {
     btn.style.visibility = "hidden";
